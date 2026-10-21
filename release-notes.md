@@ -1,3 +1,23 @@
+# 1.1.72
+
+## 中文
+
+- 版本 **1.1.72**。
+- 更新链路改向 fork 仓库 `wenjianxiong/dsh-purge-wjx`：`dsh.install.tarball` / `zip` / `git` 与 `lib/update.js` 的 `REPO` 常量同步切到新地址。
+- 修复 README 一键安装链接：`repo` 与 `downloadUrl` 两个参数此前仍指向已下线的上游（URL 编码形态，批量替换未覆盖），点下去会装到 404。
+- 新增 `scripts/publish.mjs`：一条命令完成建仓库、配 origin、推送 master 与 tag、验证 tarball 可达。
+- 新增 `scripts/set-repo.mjs`：再次改向时统一更新全部地址引用。
+- 推送前自动探测可用代理，绕开失效的 git 全局代理端口（典型：ClashX 时代遗留的 7890）。
+
+## English
+
+- **1.1.72**.
+- Update chain points at the fork `wenjianxiong/dsh-purge-wjx`: `dsh.install.tarball` / `zip` / `git` and the `REPO` constant in `lib/update.js` now resolve there.
+- Fix the one-click install link in both READMEs: the `repo` and `downloadUrl` parameters still carried the dead upstream in URL-encoded form and landed on a 404.
+- Add `scripts/publish.mjs`: creates the repository, sets origin, pushes master plus tags, verifies the tarball is reachable.
+- Add `scripts/set-repo.mjs`: rewrites every address reference when the fork moves again.
+- Push auto-detects a working proxy so a stale global git proxy port no longer breaks publishing.
+
 # 1.1.71
 
 ## 中文
