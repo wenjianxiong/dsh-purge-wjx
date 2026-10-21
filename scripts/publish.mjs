@@ -21,6 +21,7 @@
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import net from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -105,6 +106,58 @@ async function api(token, method, path, body) {
 
 function git(args, opts = {}) {
 	return execFileSync("git", args, { cwd: root, encoding: "utf8", ...opts });
+}
+
+// git 的全局代理经常还指着已经停掉的旧端口（典型：ClashX 时代的 7890，
+// 而现在 Clash Verge 用的是 7897）。不显式覆盖的话推送会直接死在
+// "Failed to connect to 127.0.0.1 port 7890"，而且报错看起来像网络不可达。
+// 解析顺序：环境变量 → 本机常见端口实测 → 都没有就清空代理走直连。
+const PROXY_CANDIDATES = [
+	"http://127.0.0.1:7897",
+	"http://127.0.0.1:7890",
+	"http://127.0.0.1:1087",
+	"http://127.0.0.1:6152",
+];
+
+function tcpAlive(url) {
+	let u;
+	try {
+		u = new URL(url);
+	} catch {
+		return Promise.resolve(false);
+	}
+	return new Promise((resolve) => {
+		const sock = net.connect({ host: u.hostname, port: Number(u.port) || 80 });
+		const finish = (ok) => {
+			sock.destroy();
+			resolve(ok);
+		};
+		sock.setTimeout(700);
+		sock.once("connect", () => finish(true));
+		sock.once("error", () => finish(false));
+		sock.once("timeout", () => finish(false));
+	});
+}
+
+function asProxyArgs(url) {
+	return ["-c", `http.proxy=${url}`, "-c", `https.proxy=${url}`];
+}
+
+async function gitProxyArgs() {
+	const fromEnv =
+		process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
+	if (fromEnv && (await tcpAlive(fromEnv))) {
+		say(c.dim(`  git 走代理 ${fromEnv}（环境变量）`));
+		return asProxyArgs(fromEnv);
+	}
+	for (const p of PROXY_CANDIDATES) {
+		if (await tcpAlive(p)) {
+			say(c.dim(`  git 走代理 ${p}（自动探测）`));
+			return asProxyArgs(p);
+		}
+	}
+	say(c.dim("  没有可用代理，git 直连"));
+	return ["-c", "http.proxy=", "-c", "https.proxy="];
 }
 
 // ── 1. 拿 token ────────────────────────────────────────────────────────────
@@ -197,8 +250,9 @@ const pushUrl = `https://x-access-token:${token}@github.com/${OWNER}/${REPO}.git
 const branch = git(["rev-parse", "--abbrev-ref", "HEAD"]).trim();
 const tags = git(["tag", "-l"]).split("\n").filter(Boolean);
 say(c.dim(`  分支 ${branch}，tag ${tags.join(" ") || "(无)"}`));
+const proxyArgs = await gitProxyArgs();
 try {
-	execFileSync("git", ["push", pushUrl, `${branch}:refs/heads/master`, "--tags"], {
+	execFileSync("git", [...proxyArgs, "push", pushUrl, `${branch}:refs/heads/master`, "--tags"], {
 		cwd: root,
 		stdio: ["ignore", "inherit", "inherit"],
 	});
