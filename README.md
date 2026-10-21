@@ -31,6 +31,12 @@
 
 > **Updates paused.** The author has no steady income for now because of work. Maintenance is on hold: no new releases, issues / PRs are not taken, and new dsh versions are not guaranteed. The repo stays usable; see Sponsor below. When maintenance resumes, this README will say so.
 
+> **Self-maintained fork notice.** The upstream repository `YuJunZhiXue/dsh-purge` went offline in October 2026 (GitHub API returns 404; no corresponding package on npm). This repository is taken over for maintenance by its users, based on upstream `v1.1.71` (commit `15df041ebe0fbfa8ad6681835659bb3b904692de`).
+>
+> **The original author's copyright and attribution requirements are preserved unchanged**: `LICENSE` remains MIT with `Copyright (c) 2026 小杨`, untouched; the "Attribution required" section and the legal notice below both stay in force. This fork is likewise free and non-profit, for personal use only — no course sales, no commercial distribution.
+>
+> **Changes vs upstream**: (1) the update-channel repository address moved from a hard-coded constant to a single source of truth in `package.json`, with a `DSH_PURGE_REPO` env override; (2) new `scripts/set-repo.mjs` to repoint in one command; (3) the hot-fixes that upstream shipped only in the built artifact were written back to source, so `scripts/build-client.mjs` is idempotent again. See [`FORK.md`](FORK.md).
+
 > **Official Web and the official desktop app are both supported.** Official `dsh web` uses profile `web`. The official desktop EXE (DeepSeek Harness **0.2.0-rc.2**) uses profile `desktop`. Install and Apply them separately. This release targets dsh 0.2 only. Older dsh builds need the matching older plugin. Community Desktop is not maintained.
 >
 > Adding the plugin to a profile does not patch the host. Click **dsh-purge** beside the session title → **Clean** → **Apply**. A successful Apply restarts; an unfinished Apply does not. After the restart, start a new chat — that is when the inject enters the session.
