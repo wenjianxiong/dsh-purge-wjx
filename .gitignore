@@ -11,7 +11,6 @@ docs/agents/
 
 # 本地草稿，不进仓库
 scripts/tmp-*.mjs
-scripts/test-*.mjs
 .scratch/
 dsh-redteam-mode-main/
 /1
