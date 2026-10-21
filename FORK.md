@@ -29,14 +29,19 @@
 
 ## 1. 相对上游的改动
 
-| commit | 内容 |
+| # | 内容 |
 | --- | --- |
-| `a6d1096` | 基线：上游 v1.1.71 完整快照，打 tag `v1.1.71` |
-| `a6c643c` | 更新链路解耦：`lib/update.js` 的 `REPO` 常量改为运行时解析；新增 `scripts/set-repo.mjs` |
-| `2a76998` | 把产物里手工热修的三处回写源码，`build-client.mjs` 重建恢复幂等 |
-| `8cccd4f` | 自维护声明（README 中英）+ 本手册 |
-| `a8a19bf` | 署名落地：`LICENSE` 追加 fork 维护行、`package.json` 补 `author`/`contributors`、welcome 弹窗中英各两处、两份 README 与本草标注「稳健熊」 |
-| `7cdc122` | 修正「LICENSE 未做任何改动」的错误表述（追加后该说法失效） |
+| 1 | 基线：上游 `v1.1.71` 完整快照，打 tag `v1.1.71` |
+| 2 | 更新链路解耦：`lib/update.js` 的 `REPO` 常量改为运行时解析；新增 `scripts/set-repo.mjs` |
+| 3 | 把产物里手工热修的三处回写源码，`build-client.mjs` 重建恢复幂等 |
+| 4 | 自维护声明（README 中英）+ 本手册 |
+| 5 | 署名落地：`LICENSE` 追加 fork 维护行、`package.json` 补 `author`/`contributors`、welcome 弹窗中英各两处、两份 README 与本手册标注「稳健熊」 |
+| 6 | 修正「LICENSE 未做任何改动」的错误表述（追加后该说法失效） |
+| 7 | 本手册补首次发布清单，修正 `set-repo` 处数统计（11 → 12） |
+| 8 | 更新源改向 `wenjianxiong/dsh-purge-wjx`（12 处；README 与本手册的上游历史引用保留未动） |
+| 9 | owner 占位填实 + README 补本仓库地址；提交历史匿名化为 `稳健熊 <wenjianxiong@users.noreply.github.com>` |
+
+> 本表不记 commit hash —— rebase / filter-branch 之后 hash 必变，以 `git log` 为准。
 
 ### 更新链路现在的解析顺序
 
