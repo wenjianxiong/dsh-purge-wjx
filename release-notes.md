@@ -9,6 +9,7 @@
 - `resolveInjectText` 改为选定来源后再按层过滤；`source` 仍按未过滤原文判定，否则层裁剪会让「是否出厂默认」误判。
 - 默认行为零变化：全量时直接返回原文，不逐层 join（join 会归一化块间空行）；实测真实 `prompt-inject.md` 31405 字符与旧逻辑逐字节一致。
 - `purge_status` 追加一行层摘要（只读，失败不影响主输出）。
+- 设置页新增「注入分层」区块与 `/dsh-purge/layers` 接口：列出每层字符数与估算 tokens，勾选即启停；`core` 标注「固定」且不提供开关。
 - 新增 30 项回归测试（`scripts/test-inject-layers.mjs`、`scripts/test-layer-config.mjs`），`.gitignore` 不再排除 `scripts/test-*`。
 
 ## English
@@ -20,6 +21,7 @@
 - `resolveInjectText` now applies layer selection after the source is resolved; `source` is still decided from the unfiltered text so trimming layers cannot make the "is this the factory default" check misfire.
 - No behaviour change by default: the full selection returns the original text instead of joining layers (joining normalises blank lines between blocks). Verified byte-identical at 31405 characters against the real `prompt-inject.md`.
 - `purge_status` gains a one-line layer summary (read-only, failure never affects the main output).
+- Settings page gains an "Injection layers" block backed by `/dsh-purge/layers`: per-layer size and estimated tokens, checkbox toggles, and `core` marked fixed with no switch.
 - 30 regression assertions added (`scripts/test-inject-layers.mjs`, `scripts/test-layer-config.mjs`); `.gitignore` no longer excludes `scripts/test-*`.
 
 # 1.1.72
