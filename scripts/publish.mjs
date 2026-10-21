@@ -273,8 +273,9 @@ if (!tarball) {
 }
 say(c.dim(`  ${tarball}`));
 let code = 0;
+let head = null;
 try {
-	const head = await fetch(tarball, { method: "HEAD", redirect: "follow" });
+	head = await fetch(tarball, { method: "HEAD", redirect: "follow" });
 	code = head.status;
 } catch (err) {
 	console.error(c.bad(`  ✗ 请求失败：${err.message}`));
@@ -284,10 +285,14 @@ if (code !== 200) {
 	console.error(c.bad(`  ✗ HTTP ${code} —— 匿名下载拿不到 tarball，插件「检查更新」会失败`));
 	process.exit(1);
 }
-const size = (await fetch(tarball)).headers.get("content-length");
+const size = head?.headers.get("content-length");
 say(`  ✓ HTTP 200${size ? `，${(Number(size) / 1024).toFixed(0)} KB` : ""}`);
 
 say(`\n${c.ok("发布完成。")}`);
 say(`  仓库   https://github.com/${OWNER}/${REPO}`);
 say(`  下载   ${tarball}`);
 say(c.dim("\n最后一步（面板侧）：重新 apply 插件，让它重新读 package.json。"));
+
+// fetch 走 undici 的 keep-alive 连接池，请求结束后 socket 仍然挂着，
+// 不显式退出的话 Node 会在所有输出打印完之后一直挂着不返回。
+process.exit(0);
