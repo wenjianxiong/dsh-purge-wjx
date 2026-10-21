@@ -164,17 +164,17 @@ dsh 的插件标识、`cordis.patch.yml` 的 `id: dsh-purge`、`~/.dsh/plugins/<
 
 1. 在 GitHub 建**空**仓库 `dsh-purge-wjx`，**不要**勾初始化 README / .gitignore / LICENSE ——
    否则首次 push 会冲突。
-2. 先空跑看清单，再实改（`<OWNER>` 换成 GitHub 用户名，必须 ASCII）：
+2. 先空跑看清单，再实改（`wenjianxiong` 换成 GitHub 用户名，必须 ASCII）：
    ```bash
-   node scripts/set-repo.mjs <OWNER>/dsh-purge-wjx --dry
-   node scripts/set-repo.mjs <OWNER>/dsh-purge-wjx
+   node scripts/set-repo.mjs wenjianxiong/dsh-purge-wjx --dry
+   node scripts/set-repo.mjs wenjianxiong/dsh-purge-wjx
    ```
 3. 复核：`git diff` 应只落在 `package.json` / `lib/update.js` / `lib/redteam/ui.js` /
    `client.js` / `.github/workflows/release.yml` 五个文件；README 与 `release-notes.md` 一条不动。
 4. 提交并推送（tag 一起推，`v1.1.71` 是基线标记）：
    ```bash
-   git commit -am 'chore: 更新源改向 <OWNER>/dsh-purge-wjx'
-   git remote add origin git@github.com:<OWNER>/dsh-purge-wjx.git
+   git commit -am 'chore: 更新源改向 wenjianxiong/dsh-purge-wjx'
+   git remote add origin git@github.com:wenjianxiong/dsh-purge-wjx.git
    git push -u origin master --tags
    ```
 5. 验证下载链路真的通（不用打开面板）：
@@ -182,7 +182,7 @@ dsh 的插件标识、`cordis.patch.yml` 的 `id: dsh-purge`、`~/.dsh/plugins/<
    grep -o 'https://github.com/[^"]*master.tar.gz' package.json
    curl -sI "$(grep -o 'https://github.com/[^"]*master.tar.gz' package.json)" | head -1
    ```
-   第一行给出的地址应是 `<OWNER>/dsh-purge-wjx`，第二行应是 `HTTP/2 200`。
+   第一行给出的地址应是 `wenjianxiong/dsh-purge-wjx`，第二行应是 `HTTP/2 200`。
 6. 面板侧生效要**重新 apply 插件**（插件在启动时读 `package.json`）；只改文件不重新 apply，
    「检查更新」还会打旧地址。
 

@@ -31,7 +31,7 @@
 
 > **暂停更新。** 作者因工作安排，近期没有稳定收入，项目维护暂时搁置：不再发版、暂不收 issue / PR，也不保证跟进新版 dsh。仓库仍可自用；赞助见下方。恢复维护时会在本 README 说明。
 
-> **【自维护 fork 声明】** 上游仓库 `YuJunZhiXue/dsh-purge` 已于 2026-10 下线（GitHub API 返回 404，npm 上亦无对应包），本仓库由 **稳健熊** 接管维护，基线为上游 `v1.1.71`（commit `15df041ebe0fbfa8ad6681835659bb3b904692de`）。
+> **【自维护 fork 声明】** 上游仓库 `YuJunZhiXue/dsh-purge` 已于 2026-10 下线（GitHub API 返回 404，npm 上亦无对应包），本仓库由 **稳健熊** 接管维护，基线为上游 `v1.1.71`（commit `15df041ebe0fbfa8ad6681835659bb3b904692de`）。本 fork 仓库：`wenjianxiong/dsh-purge-wjx`，issue / PR 请提到这里。
 >
 > **原作者的版权与署名要求完整保留**：`LICENSE` 仍为 MIT，原作者 `Copyright (c) 2026 小杨` 一行原样保留，其下追加一行 fork 维护声明；下文「署名要求」与「严正申明」全部继续有效。本 fork 同样是免费、非营利的自用维护，不卖课、不代运营、不接商业分发。
 >
