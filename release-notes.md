@@ -1,3 +1,19 @@
+# 1.1.76
+
+## 中文
+
+- 版本 **1.1.76**。
+- 修复：`refreshHungOperator` 把**过滤后**的注入文本写进进程内 `committedOverride`，而 `resolveRawInjectText` 又把它当第一优先级来源 —— 于是层标记在缓存里就已经被剥掉，`/layers` 永远只看到一层 `core`，`marked` 恒为 `false`。
+- 缓存改为存磁盘原文（`readPromptInjectFileSync`），过滤后的文本仍只用于注入，两者不再混用。
+- 实测同一份 25366 字符的分层文件：修复前解析出 1 层 / 25133 字符，修复后 5 层 / 25366 字符。
+
+## English
+
+- **1.1.76**.
+- Fix: `refreshHungOperator` wrote the **filtered** injection text into the in-process `committedOverride`, and `resolveRawInjectText` treats that as its first-priority source. The layer markers were therefore already stripped inside the cache, so `/layers` only ever saw one `core` layer and `marked` stayed `false`.
+- The cache now stores the on-disk original (`readPromptInjectFileSync`); the filtered text remains injection-only, and the two no longer mix.
+- Verified against the same 25,366-character layered file: before the fix it parsed as 1 layer / 25,133 characters, after it parses as 5 layers / 25,366.
+
 # 1.1.75
 
 ## 中文
