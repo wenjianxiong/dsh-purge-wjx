@@ -34,6 +34,9 @@
 | `a6d1096` | 基线：上游 v1.1.71 完整快照，打 tag `v1.1.71` |
 | `a6c643c` | 更新链路解耦：`lib/update.js` 的 `REPO` 常量改为运行时解析；新增 `scripts/set-repo.mjs` |
 | `2a76998` | 把产物里手工热修的三处回写源码，`build-client.mjs` 重建恢复幂等 |
+| `8cccd4f` | 自维护声明（README 中英）+ 本手册 |
+| `a8a19bf` | 署名落地：`LICENSE` 追加 fork 维护行、`package.json` 补 `author`/`contributors`、welcome 弹窗中英各两处、两份 README 与本草标注「稳健熊」 |
+| `7cdc122` | 修正「LICENSE 未做任何改动」的错误表述（追加后该说法失效） |
 
 ### 更新链路现在的解析顺序
 
@@ -139,9 +142,10 @@ node scripts/set-repo.mjs <owner>/<repo>          # 实际改
 node scripts/set-repo.mjs <owner>/<repo> --dry    # 只看会改什么
 ```
 
-它替换 11 处：`package.json`（repository/homepage/bugs/install 三条下载地址）、
-`lib/update.js` 的 `FALLBACK_REPO`、`lib/redteam/ui.js` 的兜底仓库、
-`client.js` 的 `welcome.repo`（中英各一）、`.github/workflows/release.yml` 的守卫与发布提示。
+它替换 12 处：`package.json` 6 处（`repository.url` / `homepage` / `bugs.url` /
+`dsh.install` 的 `tarball`、`zip`、`git`）、`lib/update.js` 的 `FALLBACK_REPO`、
+`lib/redteam/ui.js` 的兜底仓库、`client.js` 的 `welcome.repo`（中英各一）、
+`.github/workflows/release.yml` 的守卫与发布提示 2 处。
 
 README 与 `release-notes.md` 里的旧地址**故意不动**——那是署名与历史记录。
 
@@ -151,6 +155,39 @@ README 与 `release-notes.md` 里的旧地址**故意不动**——那是署名�
 而 `build-client.mjs` 只替换 `/* __DSH_PURGE_DRILL_BEGIN__ */` 与 `/* __DSH_PURGE_DRILL_END__ */ 之间**的内容。
 所以 `set-repo.mjs` 直接改产物是正确且必要的，重建不会把它冲掉。
 （想确认：`node -e 'const s=require("fs").readFileSync("client.js","utf8");const b=s.indexOf("/* __DSH_PURGE_DRILL_BEGIN__ */");console.log(s.indexOf("welcome.repo")>b?"在标记内":"在基座")'`）
+
+### 首次发布到新仓库（一次性）
+
+仓库名定为 **`dsh-purge-wjx`**。**`package.json` 的 `name` 仍是 `dsh-purge`，不要改** ——
+dsh 的插件标识、`cordis.patch.yml` 的 `id: dsh-purge`、`~/.dsh/plugins/<name>` 安装目录、
+以及 `lib/update.js` 的 `COPY_NAMES` 都依赖它。仓库名只是托管位置，与包名解耦。
+
+1. 在 GitHub 建**空**仓库 `dsh-purge-wjx`，**不要**勾初始化 README / .gitignore / LICENSE ——
+   否则首次 push 会冲突。
+2. 先空跑看清单，再实改（`<OWNER>` 换成 GitHub 用户名，必须 ASCII）：
+   ```bash
+   node scripts/set-repo.mjs <OWNER>/dsh-purge-wjx --dry
+   node scripts/set-repo.mjs <OWNER>/dsh-purge-wjx
+   ```
+3. 复核：`git diff` 应只落在 `package.json` / `lib/update.js` / `lib/redteam/ui.js` /
+   `client.js` / `.github/workflows/release.yml` 五个文件；README 与 `release-notes.md` 一条不动。
+4. 提交并推送（tag 一起推，`v1.1.71` 是基线标记）：
+   ```bash
+   git commit -am 'chore: 更新源改向 <OWNER>/dsh-purge-wjx'
+   git remote add origin git@github.com:<OWNER>/dsh-purge-wjx.git
+   git push -u origin master --tags
+   ```
+5. 验证下载链路真的通（不用打开面板）：
+   ```bash
+   grep -o 'https://github.com/[^"]*master.tar.gz' package.json
+   curl -sI "$(grep -o 'https://github.com/[^"]*master.tar.gz' package.json)" | head -1
+   ```
+   第一行给出的地址应是 `<OWNER>/dsh-purge-wjx`，第二行应是 `HTTP/2 200`。
+6. 面板侧生效要**重新 apply 插件**（插件在启动时读 `package.json`）；只改文件不重新 apply，
+   「检查更新」还会打旧地址。
+
+> 注：若在精简 PATH 环境（例如 agent 的 bash 工具，PATH 只有 `/usr/bin:/bin:...`）里跑，
+> `node` 会找不到，用绝对路径 `/opt/homebrew/bin/node`。
 
 ---
 
