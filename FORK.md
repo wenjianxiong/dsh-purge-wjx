@@ -40,6 +40,8 @@
 | 7 | 本手册补首次发布清单，修正 `set-repo` 处数统计（11 → 12） |
 | 8 | 更新源改向 `wenjianxiong/dsh-purge-wjx`（12 处；README 与本手册的上游历史引用保留未动） |
 | 9 | owner 占位填实 + README 补本仓库地址；提交历史匿名化为 `稳健熊 <wenjianxiong@users.noreply.github.com>` |
+| 10 | 注入文本分层：新增 `lib/inject-layers.js`（标记解析、层选择）、`lib/inject-analyzer.js`（只读分析）；`resolveInjectText` 选定来源后按层过滤，默认全量且零行为改变 |
+| 11 | 新增 `/layers` 命令与 `purge_status` 层摘要；30 项回归测试入库，`.gitignore` 不再排除 `scripts/test-*` |
 
 > 本表不记 commit hash —— rebase / filter-branch 之后 hash 必变，以 `git log` 为准。
 
@@ -223,6 +225,8 @@ dsh 的插件标识、`cordis.patch.yml` 的 `id: dsh-purge`、`~/.dsh/plugins/<
 | `lib/default-prompt-inject.md` 不入库 | 新克隆的仓库缺提示词原文 | 从 `lib/` 里已编译的默认值反推，或从运行中的插件目录取 |
 | `docs/preview/` 图片较多 | 仓库体积偏大 | 不影响运行，发版时可排除 |
 | 上游 issue 历史全丢 | 老问题的结论不可查 | 只能靠 `release-notes.md` 与本文件积累 |
+| 层标记必须独占一行 | `<!-- purge:layer NAME -->` 若缩进或在行内，不会被识别（正则要求行首尾）；反过来，代码块里恰好独占一行的同形文本会被当成真标记 | 前一种只是不生效，改格式即可；后一种不丢内容 —— `clean` 保留全部正文，只有层归属判断会错。展示标记语法时请缩进 |
+| 分层只管 systemPrompt 注入 | `/rules` 写入 `AGENTS.md` / `CLAUDE.md` 的内容不经分层 | 这是有意的：规则集是另一个注入通道（#74），混进来会让两边语义都不清楚 |
 
 ---
 
@@ -239,6 +243,8 @@ node --check lib/index.js
 node --check lib/core.js
 node --check lib/reapply.js
 node --input-type=module -e "import('./lib/index.js')"
+node scripts/test-inject-layers.mjs     # 分层解析回归（15 项）
+node scripts/test-layer-config.mjs      # 层配置读写回归（15 项）
 sed -n '1p' release-notes.md        # 必须等于 "# <当前 package.json 的 version>"
 ```
 

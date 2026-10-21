@@ -1,3 +1,27 @@
+# 1.1.73
+
+## 中文
+
+- 版本 **1.1.73**。
+- 注入文本分层：`prompt-inject.md` 支持 `<!-- purge:layer 名称 -->` … `<!-- /purge:layer -->` 标记可单独启停的层；未标记部分一律算 `core` 且永远注入，老文件不动也能照常工作。
+- 新增 `/layers` 命令：`list` 列出各层字符数与估算 tokens（●/○ 标启用状态）、`use core,web` 按需启停、`all` 恢复全量、`analyze` 输出只读分析报告（token 分布、重复段、最大块）。
+- 新增 `lib/inject-analyzer.js`：token 估算、分块、重复簇检测，纯只读，不改注入。
+- `resolveInjectText` 改为选定来源后再按层过滤；`source` 仍按未过滤原文判定，否则层裁剪会让「是否出厂默认」误判。
+- 默认行为零变化：全量时直接返回原文，不逐层 join（join 会归一化块间空行）；实测真实 `prompt-inject.md` 31405 字符与旧逻辑逐字节一致。
+- `purge_status` 追加一行层摘要（只读，失败不影响主输出）。
+- 新增 30 项回归测试（`scripts/test-inject-layers.mjs`、`scripts/test-layer-config.mjs`），`.gitignore` 不再排除 `scripts/test-*`。
+
+## English
+
+- **1.1.73**.
+- Layered injection: `prompt-inject.md` now accepts `<!-- purge:layer NAME -->` … `<!-- /purge:layer -->` markers that toggle blocks independently. Unmarked content counts as `core` and is always injected, so existing files keep working untouched.
+- New `/layers` command: `list` shows per-layer size and estimated tokens, `use core,web` toggles layers, `all` restores everything, `analyze` prints a read-only report (token spread, duplicate blocks, largest block).
+- New `lib/inject-analyzer.js`: token estimate, block splitting, duplicate clustering — read-only, never touches the injection.
+- `resolveInjectText` now applies layer selection after the source is resolved; `source` is still decided from the unfiltered text so trimming layers cannot make the "is this the factory default" check misfire.
+- No behaviour change by default: the full selection returns the original text instead of joining layers (joining normalises blank lines between blocks). Verified byte-identical at 31405 characters against the real `prompt-inject.md`.
+- `purge_status` gains a one-line layer summary (read-only, failure never affects the main output).
+- 30 regression assertions added (`scripts/test-inject-layers.mjs`, `scripts/test-layer-config.mjs`); `.gitignore` no longer excludes `scripts/test-*`.
+
 # 1.1.72
 
 ## 中文
