@@ -33,7 +33,7 @@
 
 > **Self-maintained fork notice.** The upstream repository `YuJunZhiXue/dsh-purge` went offline in October 2026 (GitHub API returns 404; no corresponding package on npm). This repository is taken over for maintenance by **稳健熊**, based on upstream `v1.1.71` (commit `15df041ebe0fbfa8ad6681835659bb3b904692de`).
 >
-> **The original author's copyright and attribution requirements are preserved unchanged**: `LICENSE` remains MIT with `Copyright (c) 2026 小杨`, untouched; the "Attribution required" section and the legal notice below both stay in force. This fork is likewise free and non-profit, for personal use only — no course sales, no commercial distribution.
+> **The original author's copyright and attribution requirements are preserved unchanged**: `LICENSE` remains MIT; the original `Copyright (c) 2026 小杨` line is preserved verbatim, with a fork-maintenance line appended beneath it; the "Attribution required" section and the legal notice below both stay in force. This fork is likewise free and non-profit, for personal use only — no course sales, no commercial distribution.
 >
 > **Changes vs upstream**: (1) the update-channel repository address moved from a hard-coded constant to a single source of truth in `package.json`, with a `DSH_PURGE_REPO` env override; (2) new `scripts/set-repo.mjs` to repoint in one command; (3) the hot-fixes that upstream shipped only in the built artifact were written back to source, so `scripts/build-client.mjs` is idempotent again. See [`FORK.md`](FORK.md).
 

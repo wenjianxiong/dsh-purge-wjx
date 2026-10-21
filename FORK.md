@@ -17,7 +17,7 @@
 | npm 包 | **不存在（HTTP 404）** | `curl -s -o /dev/null -w '%{http_code}' https://registry.npmjs.org/dsh-purge` |
 | 本仓库基线 | `v1.1.71`，上游 sha `15df041ebe0fbfa8ad6681835659bb3b904692de` | `git tag -l` / `git log` |
 | 上游自述 | README 第 32 行「暂停更新。作者因工作安排……」 | 归档原文，未改动 |
-| 许可 | MIT，`Copyright (c) 2026 小杨` | `LICENSE`（**不得改动**） |
+| 许可 | MIT，原版权行 `Copyright (c) 2026 小杨`，其下追加 fork 维护行 | `LICENSE`（**原版权行不得删改，只能在其下追加**） |
 
 上游不是被恶意删库，是作者资金与精力不足而搁置；仓库随后下线。本地 `~/.dsh/plugins/dsh-purge`
 是最后一份可用快照，`applied.json` 显示插件仍在运行。
