@@ -151,8 +151,14 @@ rsync -a --delete \
 node --check ~/.dsh/plugins/dsh-purge/lib/index.js
 node --input-type=module -e "import('file://$HOME/.dsh/plugins/dsh-purge/lib/index.js')"
 
-# 4) 【必做】重装 pnpm 依赖，把新文件复制进 store
+# 4) 让 pnpm 副本跟上（漏了这步，源目录再新也没有任何效果）
+#    1.1.75 起 applyUpdate 会把 profile 的 pnpm 副本一起 overlay，插件内点更新已自动处理。
+#    手动部署二选一：
+#    a) 重装依赖（最稳，慢，需联网）
 cd ~/.dsh/profiles/web && pnpm install
+#    b) 直接 rsync 进副本（快，离线可用，文件结果与 a 等价）
+#       V=$(ls -d ~/.dsh/profiles/web/node_modules/.pnpm/dsh-purge@file*/node_modules/dsh-purge)
+#       rsync -a --delete --exclude node_modules ./ "$V/"
 
 # 5) 验证副本已是新版本（这一步能提前抓出漏装）
 V=~/.dsh/profiles/web/node_modules/.pnpm/dsh-purge@file+..+..+plugins+dsh-purge_@deepseek-ai+cordis@4.0.4/node_modules/dsh-purge

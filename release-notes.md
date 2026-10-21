@@ -1,3 +1,19 @@
+# 1.1.75
+
+## 中文
+
+- 版本 **1.1.75**。
+- 修复：插件内「更新」按钮点了没用。`overlayFromZip` 只往源目录 `~/.dsh/plugins/dsh-purge` 写文件，而 dsh 实际加载的是 pnpm 对 `file:` 依赖的**复制品**（`profiles/<name>/node_modules/.pnpm/dsh-purge@…`），不是指向源目录的符号链接。结果是源目录已更新、宿主跑的还是旧副本，界面毫无变化，只有手跑 `pnpm install` 才恢复。
+- `_applyUpdateImpl` 现在把每个 profile 的 `profilePluginDir()` 也加进 overlay 目标，与源目录同批写入，不再依赖用户记得手动重装。
+- `FORK.md` 第 4 步补上免 pnpm 的 rsync 等价做法，并写明漏这步的症状。
+
+## English
+
+- **1.1.75**.
+- Fix: the in-plugin "update" button appeared to do nothing. `overlayFromZip` only wrote into the source directory `~/.dsh/plugins/dsh-purge`, while dsh actually loads pnpm's **copy** of the `file:` dependency (`profiles/<name>/node_modules/.pnpm/dsh-purge@…`) — not a symlink back to the source. The source went new, the host kept running the old copy, and nothing changed until `pnpm install` was run by hand.
+- `_applyUpdateImpl` now also pushes each profile's `profilePluginDir()` into the overlay targets, so both are written in one pass instead of relying on the user to remember a reinstall.
+- `FORK.md` step 4 gains a pnpm-free rsync equivalent plus the symptom of skipping it.
+
 # 1.1.74
 
 ## 中文
