@@ -37,6 +37,12 @@
     "embed-prompt": "node scripts/embed-default-prompt.mjs",
     "build:client": "node scripts/build-client.mjs"
   },
+  "author": "小杨",
+  "contributors": [
+    {
+      "name": "稳健熊"
+    }
+  ],
   "license": "MIT",
   "keywords": [
     "dsh",

@@ -31,7 +31,7 @@
 
 > **Updates paused.** The author has no steady income for now because of work. Maintenance is on hold: no new releases, issues / PRs are not taken, and new dsh versions are not guaranteed. The repo stays usable; see Sponsor below. When maintenance resumes, this README will say so.
 
-> **Self-maintained fork notice.** The upstream repository `YuJunZhiXue/dsh-purge` went offline in October 2026 (GitHub API returns 404; no corresponding package on npm). This repository is taken over for maintenance by its users, based on upstream `v1.1.71` (commit `15df041ebe0fbfa8ad6681835659bb3b904692de`).
+> **Self-maintained fork notice.** The upstream repository `YuJunZhiXue/dsh-purge` went offline in October 2026 (GitHub API returns 404; no corresponding package on npm). This repository is taken over for maintenance by **稳健熊**, based on upstream `v1.1.71` (commit `15df041ebe0fbfa8ad6681835659bb3b904692de`).
 >
 > **The original author's copyright and attribution requirements are preserved unchanged**: `LICENSE` remains MIT with `Copyright (c) 2026 小杨`, untouched; the "Attribution required" section and the legal notice below both stay in force. This fork is likewise free and non-profit, for personal use only — no course sales, no commercial distribution.
 >
