@@ -106,7 +106,25 @@ git diff --quiet client.js && echo "幂等 ✓" || echo "有漂移，检查源�
 
 ## 4. 部署到本机
 
-插件运行在 `~/.dsh/plugins/dsh-purge`。它是 dsh 正在加载的活体，**不要在它上面直接改**。
+插件源码在 `~/.dsh/plugins/dsh-purge`，但 **dsh 实际加载的不是这里**。
+
+dsh 的 web profile 把插件声明成 pnpm 的 `file:` 依赖：
+
+```
+~/.dsh/profiles/web/package.json
+  "dsh-purge": "file:../../plugins/dsh-purge"
+```
+
+pnpm 安装时会把源目录**复制**到 store，`node_modules/dsh-purge` 只是指向那份副本的符号链接：
+
+```
+~/.dsh/profiles/web/node_modules/.pnpm/
+  dsh-purge@file+..+..+plugins+dsh-purge_@deepseek-ai+cordis@4.0.4/node_modules/dsh-purge
+```
+
+**只同步源目录、不重装，dsh 仍然加载旧代码。** 这一条是 2026-10-21 翻车的原因：
+源目录已是 1.1.73、远端也已推送，但 `.pnpm` 里还是 1.1.71 的拷贝，
+面板里看不到任何变化，`/layers` 也不存在。
 
 部署清单（与 `lib/update.js` 的 `COPY_NAMES` 保持一致）：
 
@@ -121,7 +139,7 @@ package.json  README.md  README.zh-CN.md  LICENSE
 # 1) 备份当前活体
 cp -a ~/.dsh/plugins/dsh-purge ~/.dsh/plugins/dsh-purge.bak-$(date +%Y%m%d-%H%M%S)
 
-# 2) 从本仓库同步
+# 2) 从本仓库同步到源目录
 rsync -a --delete \
   --include='lib/***' --include='bin/***' --include='docs/***' \
   --include='client.js' --include='cordis.patch.yml' --include='screenshots.json' \
@@ -133,10 +151,24 @@ rsync -a --delete \
 node --check ~/.dsh/plugins/dsh-purge/lib/index.js
 node --input-type=module -e "import('file://$HOME/.dsh/plugins/dsh-purge/lib/index.js')"
 
-# 4) 重启宿主 / 在面板里重新「应用」，然后看 ~/.dsh/dsh-purge/applied.json 的 sha
+# 4) 【必做】重装 pnpm 依赖，把新文件复制进 store
+cd ~/.dsh/profiles/web && pnpm install
+
+# 5) 验证副本已是新版本（这一步能提前抓出漏装）
+V=~/.dsh/profiles/web/node_modules/.pnpm/dsh-purge@file+..+..+plugins+dsh-purge_@deepseek-ai+cordis@4.0.4/node_modules/dsh-purge
+grep '"version"' "$V/package.json"
+grep -c LayersSection "$V/client.js"        # 换成当次要验证的新符号
+
+# 6) 重启宿主，浏览器硬刷新
+touch ~/.dsh/logs/.restart-requested && kill -TERM <dsh PID>
 ```
 
-回滚：把第 1 步的 `.bak-*` 目录换回去，再重启。
+**漏掉第 4 步的症状**：源目录明明是新的，但面板毫无变化、新命令不存在、版本号停在旧值。
+
+`pnpm install` 按 `package.json` 的 `files` 白名单复制，所以 `FORK.md`、`release-notes.md`、
+`.github/`、`.gitignore` **不会**进 store —— 它们只留在源目录和仓库里。
+
+回滚：把第 1 步的 `.bak-*` 目录换回源目录，重跑第 4、6 步。
 
 ---
 
