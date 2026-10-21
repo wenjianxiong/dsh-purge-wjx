@@ -61,11 +61,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YuJunZhiXue/dsh-purge.git"
+    "url": "git+https://github.com/wenjianxiong/dsh-purge-wjx.git"
   },
-  "homepage": "https://github.com/YuJunZhiXue/dsh-purge#readme",
+  "homepage": "https://github.com/wenjianxiong/dsh-purge-wjx#readme",
   "bugs": {
-    "url": "https://github.com/YuJunZhiXue/dsh-purge/issues"
+    "url": "https://github.com/wenjianxiong/dsh-purge-wjx/issues"
   },
   "dsh": {
     "bundle": {
@@ -83,9 +83,9 @@
     },
     "install": {
       "preferred": "tarball",
-      "tarball": "https://github.com/YuJunZhiXue/dsh-purge/archive/refs/heads/master.tar.gz",
-      "zip": "https://github.com/YuJunZhiXue/dsh-purge/archive/refs/heads/master.zip",
-      "git": "https://github.com/YuJunZhiXue/dsh-purge.git"
+      "tarball": "https://github.com/wenjianxiong/dsh-purge-wjx/archive/refs/heads/master.tar.gz",
+      "zip": "https://github.com/wenjianxiong/dsh-purge-wjx/archive/refs/heads/master.zip",
+      "git": "https://github.com/wenjianxiong/dsh-purge-wjx.git"
     }
   },
   "publishConfig": {
