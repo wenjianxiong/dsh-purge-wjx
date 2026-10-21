@@ -136,6 +136,19 @@ window.__ModuleLoader__.load({ id: "dsh-purge", factory: (require) => {
 			"dock.full": "全面浏览",
 			"dock.close": "收起",
 			"dock.unauthorized": "未授权",
+			"layers.title": "注入分层",
+			"layers.hint": "把 prompt-inject.md 按 <!-- purge:layer 名称 --> … <!-- /purge:layer --> 切成可单独启停的层。未标记的内容一律算 core，永远注入。",
+			"layers.empty": "当前没有任何层标记，整份内容算作 core。加上标记就能分层。",
+			"layers.fixed": "固定",
+			"layers.on": "启用中",
+			"layers.off": "已停用",
+			"layers.all": "恢复全量",
+			"layers.analyze": "分析",
+			"layers.saved": "已保存，新会话生效",
+			"layers.summary": "启用 {kept} / 全量 {total} tokens",
+			"layers.source.prompt": "来源 prompt-inject.md",
+			"layers.source.default": "来源内置默认",
+			"layers.load": "读取失败：{error}",
 			"welcome.title": "用户须知",
 			"welcome.lead": "首次安装本插件时请阅读以下说明。确认后本窗不再弹出。",
 			"welcome.warn": "本插件免费开源。任何背着原作者或维护者私自售卖、付费倒卖或借本项目盈利的行为，原作者与维护者将依法追究法律责任。",
@@ -476,6 +489,19 @@ window.__ModuleLoader__.load({ id: "dsh-purge", factory: (require) => {
 			"dock.full": "Full view",
 			"dock.close": "Collapse",
 			"dock.unauthorized": "Unauthorized",
+			"layers.title": "Injection layers",
+			"layers.hint": "Split prompt-inject.md into toggleable layers with <!-- purge:layer NAME --> … <!-- /purge:layer -->. Unmarked content counts as core and is always injected.",
+			"layers.empty": "No layer markers yet — the whole file is core. Add markers to split it.",
+			"layers.fixed": "fixed",
+			"layers.on": "on",
+			"layers.off": "off",
+			"layers.all": "Restore all",
+			"layers.analyze": "Analyze",
+			"layers.saved": "Saved — applies to new sessions",
+			"layers.summary": "{kept} of {total} tokens enabled",
+			"layers.source.prompt": "from prompt-inject.md",
+			"layers.source.default": "built-in default",
+			"layers.load": "Load failed: {error}",
 			"welcome.title": "User notice",
 			"welcome.lead": "Please read this on first install. After you confirm, it will not appear again.",
 			"welcome.warn": "This plugin is free and open source. Anyone who sells, resells, or profits from it behind the original author's or maintainer's back may face legal action.",
@@ -2791,6 +2817,102 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
 			return detectHostTheme();
 		}
 
+		function layersApi(op, extra) {
+			return apiJson("/dsh-purge/layers", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify(Object.assign({ op: op }, extra || {})),
+			});
+		}
+
+		/** 注入分层：列出每层大小与启用状态，勾选即改配置。core 永远启用，不提供开关。 */
+		function LayersSection() {
+			const t = useT();
+			const [st, setSt] = useState(null);
+			const [busy, setBusy] = useState(false);
+			const [notice, setNotice] = useState({ kind: "idle", text: "" });
+
+			const load = useCallback(() => {
+				layersApi("status")
+					.then((d) => {
+						if (d && d.ok) setSt(d);
+						else setSt({ ok: false, layers: [], error: (d && d.error) || "bad response" });
+					})
+					.catch((e) => setSt({ ok: false, layers: [], error: String((e && e.message) || e || "") }));
+			}, []);
+
+			useEffect(() => { load(); }, [load]);
+
+			const save = useCallback((want) => {
+				setBusy(true);
+				setNotice({ kind: "idle", text: "" });
+				layersApi("set", { layers: want })
+					.then((d) => {
+						if (d && d.ok) {
+							setNotice({ kind: "ok", text: t("layers.saved") });
+							load();
+						} else {
+							setNotice({ kind: "error", text: (d && d.error) || "save failed" });
+						}
+					})
+					.catch((e) => setNotice({ kind: "error", text: String((e && e.message) || e || "") }))
+					.finally(() => setBusy(false));
+			}, [load, t]);
+
+			const toggle = useCallback((name, on) => {
+				if (!st || !Array.isArray(st.layers)) return;
+				const cur = st.layers.filter((l) => l.enabled).map((l) => l.name);
+				// core 不在可停用集内，这里也不把它写进配置，保持配置文件可读。
+				save(on ? [...cur, name] : cur.filter((n) => n !== name));
+			}, [st, save]);
+
+			const head = h("div", { className: "dshp-head" },
+				h("h3", { className: "dshp-title" }, t("layers.title")),
+				h("div", { className: "dshp-row", style: { margin: 0 } },
+					noticeNode(notice),
+					h(Btn, { tiny: true, disabled: busy || !st || st.ok === false, onClick: () => save("all") }, t("layers.all")),
+				),
+			);
+
+			if (!st) {
+				return h("section", { className: "dshp-panel" }, head,
+					h("p", { className: "dshp-empty" }, "…"));
+			}
+			if (st.ok === false) {
+				return h("section", { className: "dshp-panel" }, head,
+					h("p", { className: "dshp-empty" }, t("layers.load", { error: st.error || "" })));
+			}
+
+			const rows = (st.layers || []).map((l) => h("div", {
+				key: l.name,
+				className: "dshp-cwd-item" + (l.enabled ? " is-on" : ""),
+				style: { display: "flex", alignItems: "center", gap: 10, padding: "8px 10px" },
+			},
+				h("label", { style: { display: "flex", alignItems: "center", gap: 8, flex: 1, cursor: l.always ? "default" : "pointer" } },
+					h("input", {
+						type: "checkbox",
+						checked: !!l.enabled,
+						disabled: busy || l.always,
+						onChange: (e) => toggle(l.name, e.target.checked),
+					}),
+					h("b", null, l.name),
+					l.always ? h("span", { className: "dshp-rule-meta" }, t("layers.fixed")) : null,
+				),
+				h("span", { className: "dshp-rule-meta" }, l.chars + " · ~" + l.tokens + " tokens"),
+				h("span", { className: "dshp-rule-meta" }, l.enabled ? t("layers.on") : t("layers.off")),
+			));
+
+			return h("section", { className: "dshp-panel", "aria-label": t("layers.title") }, head,
+				h("p", { className: "dshp-block-hint" }, t("layers.hint")),
+				h("p", { className: "dshp-block-hint" },
+					t("layers.summary", { kept: st.keptTokens, total: st.totalTokens }) + " · " +
+					(st.source === "default" ? t("layers.source.default") : t("layers.source.prompt"))),
+				st.marked === false
+					? h("p", { className: "dshp-empty" }, t("layers.empty"))
+					: h("div", { className: "dshp-cwd-list" }, rows),
+			);
+		}
+
 		function SettingsRoot(props) {
 			const t = typeof props.t === "function" ? props.t : ((key) => key);
 			const [theme, setTheme] = useState(readTheme);
@@ -2828,6 +2950,7 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
 				h("style", null, PURGE_CSS),
 				h(PurgifySection, null),
 				h(RulesSection, null),
+				h(LayersSection, null),
 				h(SkillsSection, null),
 			);
 		}
