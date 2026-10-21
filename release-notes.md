@@ -1,3 +1,21 @@
+# 1.1.74
+
+## 中文
+
+- 版本 **1.1.74**。
+- 修复：`commitOverrideOnApply` 会把 apply 那一刻的磁盘正文写进进程内的 `committedOverride`，而 `peekCommittedOverride` 优先级高于磁盘 —— 结果是用户改完 `prompt-inject.md` 后，界面上读到的仍是启动那一刻的旧文本，只有重启 dsh 才恢复。
+- 新增 `core.clearCommittedOverride()`：丢掉进程内缓存，让后续解析回落到磁盘。
+- 新增 `/layers reload`（别名 `r`）：清缓存并立即重读磁盘，改完注入文件不必重启。
+- 实测：清空后 `resolveRawInjectText` 由缓存的 31405 字符回落为磁盘的 25366 字符（5 层：core / refusal / eng / ctf）。
+
+## English
+
+- **1.1.74**.
+- Fix: `commitOverrideOnApply` wrote the on-disk text into the in-process `committedOverride` at apply time, and `peekCommittedOverride` outranks the disk. Editing `prompt-inject.md` therefore appeared to do nothing until dsh restarted.
+- New `core.clearCommittedOverride()`: drops the in-process cache so later resolution falls back to disk.
+- New `/layers reload` (alias `r`): clears the cache and re-reads the file immediately, so editing the injection no longer needs a restart.
+- Verified: after clearing, `resolveRawInjectText` drops from the cached 31405 characters to the on-disk 25366 (5 layers: core / refusal / eng / ctf).
+
 # 1.1.73
 
 ## 中文
