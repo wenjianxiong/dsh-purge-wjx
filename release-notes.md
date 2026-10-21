@@ -1,3 +1,25 @@
+# 1.1.77
+
+## 中文
+
+- 版本 **1.1.77**。
+- 新增：授权声明可以持久化。`/auth on` 声明一次，在有效期内注入会带一行授权状态，切换目标不用再重复说「该行为已授权」。`/auth off` 立即撤销，`/auth status` 看到期时间。
+- 默认有效期 8 小时，可指定：`/auth on 2 本地靶场`。
+- 措辞刻意保持区分：注入里写的是「操作员声明对当前工作范围具有处置权」，不是「处置权已成立」。前者是这段 JSON 能如实转述的事实，后者需要域名解析、文件归属这类外部证据，一段配置证明不了。
+- 到期后自动回落到逐次确认模式，不需要手动清。
+- 新文件 `lib/authorization.js`；`resolveInjectText` 在层选择之后追加该段（它不属于任何一层，也不参与层裁剪）。
+- 顺带：`lib/core.js` 拆分完成，从 7,995 行降到 4,515 行（-44%），拆出 `prompt-cache.js`、`fsutil.js`、`target-path.js`、`fsprobe.js`、`path-memo.js`、`patches/defs.js` 六个模块。全部 `node --check` 通过，导出契约仍是 5 个。
+
+## English
+
+- **1.1.77**.
+- New: the authorization declaration can now persist. Grant once with `/auth on` and the injection carries an authorization line for the whole window, so switching targets no longer means repeating "this action is authorized". `/auth off` revokes immediately; `/auth status` shows the expiry.
+- Default window is 8 hours, configurable: `/auth on 2 local-lab`.
+- The wording keeps the distinction: the injection says "the operator declared disposal authority over the current scope", not "authority is established". The first is what this JSON can faithfully report; the second needs outside evidence like DNS resolution or file ownership, which a config file cannot supply.
+- The window expires back to per-operation confirmation automatically.
+- New file `lib/authorization.js`; `resolveInjectText` appends the section after layer selection (it belongs to no layer and is not affected by layer filtering).
+- Also: `lib/core.js` split is done, 7,995 → 4,515 lines (-44%), extracting `prompt-cache.js`, `fsutil.js`, `target-path.js`, `fsprobe.js`, `path-memo.js`, `patches/defs.js`. All pass `node --check`; the export contract is still 5.
+
 # 1.1.76
 
 ## 中文
