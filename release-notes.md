@@ -1,3 +1,23 @@
+# 1.1.79
+
+## 中文
+
+- 版本 **1.1.79**。
+- 新增三个测试文件（`scripts/test/`），跑在 Node 内置 `node:test` 上，零依赖：补丁定义自洽性（7 项）、`atomicWriteSync`（5 项）、授权状态机（13 项）。
+- `package.json` 加 `test` script，一条命令跑全部 55 项（25 项 `node:test` + 两个旧 runner 各 15 项）。
+- 新增 `.github/workflows/test.yml`：push 到 master 与 PR 时在 Node 20/22 上跑逐文件语法检查 + 全部测试。零依赖所以不需要 `npm install`。
+- **修掉一个真 bug**：`lib/authorization.js` 的 `ttlMs <= 0`（不设到期）分支从来没生效过。`grantAuth` 写 `expiresAt: 0`，而 `readAuthState` 用 `!expiresAt` 判空，0 是 falsy，于是 `/auth on 0` 写下的声明读回来就是「未声明」。现在 `expiresAt` 归一为 `null`，是否设到期由独立的 `hasExpiry` 判定。
+- 测试还跑出另一件事：4 条补丁（id 3 / 21 / 40 / 73）的 `replacements[0].pattern` 是 `RegExp` 而非字符串，属于有意的跨行匹配，断言已相应放宽。
+
+## English
+
+- **1.1.79**.
+- Three new test files under `scripts/test/`, running on Node's built-in `node:test` with zero dependencies: patch-definition invariants (7), `atomicWriteSync` (5), and the authorization state machine (13).
+- `package.json` gains a `test` script that runs all 55 assertions in one command (25 `node:test` + the two older standalone runners at 15 each).
+- New `.github/workflows/test.yml`: per-file syntax checks plus the full suite on Node 20/22, on push to master and on pull requests. Zero dependencies means no `npm install` step.
+- **One real bug fixed**: the `ttlMs <= 0` ("no expiry") branch in `lib/authorization.js` never worked. `grantAuth` wrote `expiresAt: 0` while `readAuthState` tested emptiness with `!expiresAt`, and `0` is falsy, so a declaration made with `/auth on 0` read back as "not declared". `expiresAt` is now normalized to `null` and expiry is decided by a separate `hasExpiry` flag.
+- Testing also surfaced that four patches (ids 3 / 21 / 40 / 73) carry `RegExp` patterns in `replacements[0].pattern` rather than strings — intentional multi-line matching, so the assertion was loosened to accept both.
+
 # 1.1.78
 
 ## 中文

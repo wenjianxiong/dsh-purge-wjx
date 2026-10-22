@@ -1,0 +1,33 @@
+name: test
+
+# 零依赖，不需要 npm install —— package.json 里 devDependencies 是空的，
+# 所有测试跑在 node 内置的 node:test 上。加依赖的那一刻这条会变成谎言。
+on:
+  push:
+    branches: [master]
+    tags-ignore: ["**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 18 是 package.json engines 的下界，但 node --test 在 18 上还是实验特性；
+        # 从 20 起稳定，所以这里测 20/22，下界那条由 engines 声明负责。
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Line-by-line syntax check
+        run: |
+          fail=0
+          for f in $(find lib bin scripts -name '*.js' -o -name '*.mjs'); do
+            node --check "$f" || fail=1
+          done
+          exit $fail
+      - name: Unit tests
+        run: npm test
