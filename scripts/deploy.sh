@@ -55,6 +55,10 @@ if [ -n "$BEFORE" ]; then
 fi
 (cd "$PROFILE" && pnpm install --prefer-offline 2>&1 | tail -3)
 
+echo "== 4.5/5 清理旧备份 =="
+# 每次部署留两份备份（源 + store），不回收的话几十次就是几百 MB。
+node "$REPO/scripts/prune-backups.mjs" --keep 3 | tail -2 || true
+
 STORE="$(store_path || true)"
 [ -n "$STORE" ] || { echo "找不到 .pnpm store，安装可能失败" >&2; exit 1; }
 VER_STORE="$(node -p "require('$STORE/package.json').version")"

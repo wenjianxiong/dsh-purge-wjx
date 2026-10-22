@@ -1,3 +1,27 @@
+# 1.1.78
+
+## 中文
+
+- 版本 **1.1.78**。
+- 新增 `scripts/prune-backups.mjs`：按 mtime 分组保留最近 N 个备份，默认每组 3 个，`--dry` 可预览，`--keep N` 可调。
+- `scripts/deploy.sh` 增加第 4.5 步，部署完自动清理 —— 之前每跑一次留两份备份（源目录 + pnpm store），没有任何回收逻辑。
+- `lib/redteam/store-core.js` 里 12 处 `writeFileSync` 全部换成 `atomicWriteSync`（`lib/fsutil.js`）。涉及 `engagement.yaml`、`current` 指针、prompt manifest、提示词文件 —— 这些文件写坏等于丢靶标，原来都是直接覆盖。
+- 原子写走 write-to-tmp + rename：EBUSY / ENOSPC 都不会留下半截文件，要么旧内容要么新内容。
+- 实测：`setActiveEngagement` 写入后 `current` 内容正确、根目录零 tmp 残留，二次写入同样干净。
+- 顺带纠正一处数字：之前说的「354MB 备份」把 dsh 自身的两次升级备份（`upgrade-20261018` 138MB + `upgrade-dsh-0.2.0-rc2` 168MB）算进去了。dsh-purge 自己的备份实际是 37MB，脚本只清 dsh-purge 的，不碰 dsh 升级备份。
+
+## English
+
+- **1.1.78**.
+- New `scripts/prune-backups.mjs`: keeps the newest N backups per group (default 3), `--dry` to preview, `--keep N` to tune.
+- `scripts/deploy.sh` gains step 4.5 and prunes automatically after deploying — each run used to leave two backups (source dir + pnpm store) with no reclamation at all.
+- All 12 `writeFileSync` calls in `lib/redteam/store-core.js` now use `atomicWriteSync` from `lib/fsutil.js`. The affected files are `engagement.yaml`, the `current` pointer, the prompt manifest, and prompt files — corrupting any of them means losing an engagement, and they were plain overwrites.
+- Atomic writes are write-to-tmp + rename: EBUSY / ENOSPC cannot leave a half-written file, it is either the old content or the new one.
+- Verified: after `setActiveEngagement` the `current` file holds the right value, zero `.tmp` leftovers in the root, and a second write is equally clean.
+- One number corrected: the earlier "354MB of backups" included two dsh upgrade backups (`upgrade-20261018` 138MB + `upgrade-dsh-0.2.0-rc2` 168MB). dsh-purge's own backups are 37MB, and the script only touches those, not dsh upgrade backups.
+
+
+
 # 1.1.77
 
 ## 中文
