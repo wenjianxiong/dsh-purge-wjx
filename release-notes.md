@@ -1,3 +1,23 @@
+# 1.1.86
+
+## 中文
+
+- **修 4 条长期 skip 的补丁**：`#32 WEB_SURFACE_IDENTITY_NEUTRAL`、`#53 WEB_SURFACE_PROHIBITION`、`#40 COMPLETE_PROMPT_KEEP_INJECT`、`#77 REWIND_DROP_SENT_ON_APPEND` 的 pattern 已对不上 0.2.1 宿主，实际效果是「网页端身份没被清洗」，只是报错行里看不见。现已对齐。
+- **Web 面身份句换了家**：0.2.1 起 `WEB_SURFACE_PROMPT` 从 `dsh-web-app` 搬到 `dsh-harness-dev-context`。#32/#53 已改指向新包，并在 `lib/core.js` 登记 `harness-dev-context` 文件键。
+- **新增 `#89 WEB_SURFACE_CONTEXT_URL_NEUTRAL`**：`dsh-harness-dev-context` 每轮往 system context 塞的 `Current DeepSeek Harness Web GUI URL: …` 独立泄漏点，#32 覆盖不到，现改为 `Current web GUI URL: …`。
+- **修 `#40` 的语义回退**：`#40` 的替换会把宿主 `contexts: runtimeContextSuppressed ? transformed.contexts.filter(...) : …` 压成 `? [] : …`，导致 runtime-context 被抑制时**所有** context 被丢，而不是只留 required 的那些。现已保留 `requiredContexts` 并复现原过滤语义。
+- **`applyPatches` 写前补备份**：新增 file key 时 `backupAll` 从未跑过，原件会被直接覆盖且无法回滚（`harness-dev-context` 就这么丢过一次原件，已从 `app.asar.bak` 抽回并补上 `.dshpurge.bak`）。
+- **`#53` 标记不再进提示词**：原先替换串里内联了 `// [dsh-purge] …`，它会原样出现在 system prompt 里。现改成干净句子，`markers` 同步更新。
+
+## English
+
+- Fixed four long-skipped patches (`#32`, `#53`, `#40`, `#77`) whose patterns no longer matched the 0.2.1 host — the web-surface identity was silently never neutralized.
+- `WEB_SURFACE_PROMPT` moved from `dsh-web-app` to `dsh-harness-dev-context` in 0.2.1; patches retargeted and a `harness-dev-context` file key registered.
+- New patch `#89` neutralizes the per-turn `Current DeepSeek Harness Web GUI URL:` context line.
+- `#40` no longer collapses `contexts` to `[]` under runtime-context suppression; `requiredContexts` is preserved.
+- `applyPatches` now backs up before writing, so newly registered file keys cannot be overwritten without a restore point.
+- `#53` no longer leaks its internal marker into the prompt text.
+
 # 1.1.85
 
 ## 中文

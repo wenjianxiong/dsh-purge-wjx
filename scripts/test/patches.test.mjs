@@ -1,5 +1,5 @@
 /**
- * 82 条清洗补丁的定义完整性。
+ * 83 条清洗补丁的定义完整性。
  *
  * 这些断言只查"定义是否自洽"，不查"补丁打在哪些字面量上对不对"——
  * 后者需要真实 dsh 安装树，属于集成测试。这里的价值是：改 defs.js 时
@@ -12,8 +12,8 @@ import { ALL_PATCHES, PATCH_DISPLAY_GROUPS } from "../../lib/patches/defs.js";
 // 一条补丁只要带其中任意一种，就算有动作；全都没有等于这条定义是死的。
 const ACTION_KEYS = ["replacements", "markers", "marker", "patterns", "replace", "config"];
 
-test("补丁总数是 82", () => {
-  assert.equal(ALL_PATCHES.length, 82);
+test("补丁总数是 83", () => {
+  assert.equal(ALL_PATCHES.length, 83);
 });
 
 test("id 全部唯一", () => {
