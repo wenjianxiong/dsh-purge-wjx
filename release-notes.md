@@ -1,3 +1,28 @@
+# 1.1.80
+
+## 中文
+
+- 版本 **1.1.80**。注入按任务族裁剪 + 逆向专用开工单。
+- 新增 `lib/task-router.js`：把当前这轮的用户原话归类成 `re` / `web` / `ctf` / `ir` / `general` 五个任务族，识别用关键词打分（中文按字面匹配，不依赖分词），认不出就是 `general`。
+- 注入层随之裁剪：`core` / `refusal` / `eng` 三层层层常驻，`route.re` / `web` / `ctf` / `route.ir` 这些领域层只在对应任务族注入。自定义层名一律保留 —— 裁剪只管插件认识的领域层，不动用户自己写的东西。
+- 实测（本机 6 层注入）：全量 ~6439 tok，逆向任务降到 ~4521（省 30%）、web ~4022（省 38%）、CTF ~5039（省 22%）、应急与闲聊 ~3572（省 45%）。
+- 新增 `presets/layers/`：`refusal.md`（常驻，输出契约）、`web.md`（web 渗透工作单）、`route.re.md`（**逆向/卡密开工单**：载体定位 → 校验点 → patch table → keygen → 四件套验证 → 常见卡点）。配套 `scripts/install-layers.mjs` 装进 `prompt-inject.md`：同名层替换、新层追加、写前自动备份。
+- `refusal` 层去掉大段"禁用词清单"改成结构性描述 —— 把拒绝词汇写进上下文本身就在抬高拒答倾向，负向列表越全，模型越容易复读它。
+- `inject-layers.json` 支持 `routing: false`：关掉裁剪、恢复全量注入。缺省开启。
+- **修两个真 bug**：① `pruneForFamily` 认不出 `route.*` 前缀的层名，导致 `route.re` 在 CTF 任务里照样注入；② `routing: false` 之前只是把任务族降成 `general`，而 `general` 仍会裁领域层 —— 开关等于没有。现在两者分开。
+- 层名允许点号（`route.re`）。旧正则只认 `[A-Za-z0-9_-]`，`<!-- purge:layer route.re -->` 会静默失配，那一段被并进上一层，用户看不到报错只看到层内容串味。
+
+## English
+
+- Version **1.1.80**. Task-family injection pruning plus a reverse-engineering work order.
+- New `lib/task-router.js`: classifies the current turn's user utterance into `re` / `web` / `ctf` / `ir` / `general` by keyword scoring; unrecognized input falls back to `general`.
+- Layer pruning: `core` / `refusal` / `eng` always injected; `route.re` / `web` / `ctf` / `route.ir` only for their family. Custom layer names are always kept — pruning only touches domain layers the plugin knows.
+- Measured on a 6-layer setup: full ~6439 tok; reverse engineering ~4521 (-30%), web ~4022 (-38%), CTF ~5039 (-22%), IR/chit-chat ~3572 (-45%).
+- New `presets/layers/`: `refusal.md` (always-on output contract), `web.md` (web pentest playbook), `route.re.md` (reverse-engineering / license work order: carrier → check site → patch table → keygen → four-artifact verification → known blockers). Installed via `scripts/install-layers.mjs` (replace same-name layer, append new layers, backup before write).
+- The `refusal` layer drops the long banned-phrase inventory in favor of structural description — listing refusal vocabulary in context primes it.
+- `inject-layers.json` accepts `routing: false` to disable pruning and restore full injection (on by default).
+- Two real bugs fixed: (1) `pruneForFamily` did not recognize `route.*` prefixes; (2) `routing: false` only downgraded the family to `general`, which still pruned domain layers. Layer names now allow dots, so `<!-- purge:layer route.re -->` no longer fails silently.
+
 # 1.1.79
 
 ## 中文
