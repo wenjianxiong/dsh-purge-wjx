@@ -1,3 +1,42 @@
+# 1.1.82
+
+## 中文
+
+`route.re`（逆向 / 卡密开工单）补上 arm64 实战部分——全部来自一次真跑，不是抄的。
+
+用一个 clang 编的 license check 样本（Mach-O arm64）走完整条链：`file` 定载体 → `strings` 捞提示串 → `nm` 定位 `check_license` → r2 xref 找调用点 → `pdf` 读比较指令 → 还原 FNV-1a32 异或常量写 keygen → 定位 `cset w8, eq` 改 `mov w8, #1` → copy-first 打补丁 → 三段验证。
+
+写进层的五条 arm64 要点，都是这次踩出来的：
+
+- 地址映射：`file offset = vaddr - 0x100000000`，但必须先用 `r2 -c 'iS~__TEXT'` 核对 vaddr 与 fileoff 的差，不能硬套。
+- 比较结果通常是 `cmp` + `cset wN, eq`，改 `cset` 比找跳转稳：`e8 17 9f 1a` → `28 00 80 52`。
+- 精确改字节用 `dd`，不用 `r2 -w`：`printf '\x28\x00\x80\x52' | dd of=SAMPLE.work bs=1 seek=$((0x4d4)) count=4 conv=notrunc`。
+- 改过字节的 Mach-O 签名必失效要重签；**回滚不要重签**——`cp` 回来的副本与原件字节相同、原签名随之有效，重签反而让 sha256 对不上。
+- r2 的 `pdf` 输出为空时先 `s <addr>; af; pdf` 手动建函数，别以为反汇编坏了。
+
+patch table 也补了三行 arm64 编码（`cset w8,eq` → `mov w8,#1`、`nop` → `ret`），与原有 x86 三行并列。
+
+`route.re` 层 2788 → 4247 字（+1459，≈+384 tok），只在逆向任务注入；其余任务族不受影响，`general` 仍是 5602 字 ≈1474 tok。
+
+## English
+
+`route.re` (the reverse-engineering / license-key work order) gains its arm64 section — every line taken from an actual run, not from memory.
+
+A clang-built license-check sample (Mach-O arm64) was walked end to end: `file` to identify the carrier → `strings` for telltale prompts → `nm` to locate `check_license` → r2 xref for the call site → `pdf` to read the comparison → recover the FNV-1a32 XOR constant and write the keygen → locate `cset w8, eq` and turn it into `mov w8, #1` → copy-first patching → three-leg verification.
+
+Five arm64 notes went into the layer, each learned the hard way in that run:
+
+- Address mapping: `file offset = vaddr - 0x100000000`, but confirm the vaddr/fileoff delta with `r2 -c 'iS~__TEXT'` first — do not hardcode it.
+- Check results are usually `cmp` + `cset wN, eq`; patching `cset` is steadier than hunting a branch: `e8 17 9f 1a` → `28 00 80 52`.
+- Patch exact bytes with `dd`, not `r2 -w`:
+  `printf '\x28\x00\x80\x52' | dd of=SAMPLE.work bs=1 seek=$((0x4d4)) count=4 conv=notrunc`.
+- Any byte change invalidates a Mach-O signature, so re-sign the patched copy; **do not re-sign on rollback** — the `cp`'d copy is byte-identical to the original and inherits a valid signature, and re-signing makes its sha256 diverge from the original.
+- When r2's `pdf` prints nothing, run `s <addr>; af; pdf` to define the function by hand instead of assuming the disassembly is broken.
+
+The patch table also gains three arm64 encodings (`cset w8,eq` → `mov w8,#1`, `nop` → `ret`) alongside the three existing x86 rows.
+
+`route.re` grows 2788 → 4247 chars (+1459, ≈+384 tok) and is injected for RE tasks only; other families are unaffected, and `general` stays at 5602 chars ≈1474 tok.
+
 # 1.1.81
 
 ## 中文

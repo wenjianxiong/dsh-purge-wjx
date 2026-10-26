@@ -31,12 +31,21 @@ strace -f -e trace=openat,stat,read ./SAMPLE 2>&1 | tail -40
 
 | 地址/行号 | 原字节 | 改后 | 效果 |
 |---|---|---|---|
-| `0x<ADDR>` | `75 xx` | `90 90` | 失败分支抹平，校验恒过 |
-| `0x<ADDR>` | `74 xx` | `EB xx` | 跳转改到成功路径 |
-| `0x<ADDR>` | `B8 00 00 00 00` | `B8 01 00 00 00` | 返回值 0 → 1 |
+| `0x<ADDR>` | `75 xx` | `90 90` | x86 失败分支抹平，校验恒过 |
+| `0x<ADDR>` | `74 xx` | `EB xx` | x86 跳转改到成功路径 |
+| `0x<ADDR>` | `B8 00 00 00 00` | `B8 01 00 00 00` | x86 返回值 0 → 1 |
+| `0x<ADDR>` | `e8 17 9f 1a` | `28 00 80 52` | arm64 `cset w8, eq` → `mov w8, #1`，结果恒真 |
+| `0x<ADDR>` | `1f 20 03 d5` | `c0 03 5f d6` | arm64 `nop` → `ret`，整函数空过 |
 | `<LINE>` | `check_license "$K" \|\| exit 1` | `# check_license "$K"` | 脚本校验注释掉 |
 
 脚本类用行号，二进制类用地址 + 原/改字节。每条都要写"怎么验证这一条生效"。
+
+arm64 要点（Apple Silicon 上几乎必踩）：
+- 地址映射：`file offset = vaddr - 0x100000000`（`__TEXT.__text` 的 fileoff 通常为 0，先用 `r2 -c 'iS~__TEXT'` 核对 vaddr 与 fileoff 的差，别硬套）
+- 比较结果常是 `cmp` + `cset wN, eq`，改 `cset` 比找跳转稳：`e8 17 9f 1a`（cset w8,eq）→ `28 00 80 52`（mov w8,#1）
+- 精确改字节用 dd 而非 r2 -w：`printf '\x28\x00\x80\x52' | dd of=SAMPLE.work bs=1 seek=$((0x4d4)) count=4 conv=notrunc`
+- 改过字节的 Mach-O 签名必失效，要 `codesign --force --sign - SAMPLE.work` 重签 ad-hoc；**回滚不需要重签**——`cp` 回来的副本与原件字节相同，原件签名随之有效，重签反而会让 sha256 对不上原件
+- r2 的 `pdf` 若输出为空，先 `s <addr>; af; pdf` 手动建函数，不要以为反汇编坏了
 
 ### 4 keygen / 校验算法还原
 
