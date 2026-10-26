@@ -1,3 +1,25 @@
+# 1.1.81
+
+## 中文
+
+- `eng` 层从 8373 字压到 873 字（-90%），三处都是真的错，不是"写得啰嗦"：
+  - 它要求「Always use apply_patch for manual code edits」，而本运行时的工具是 `read` / `write` / `edit` / `grep` / `glob` / `bash`，**没有 apply_patch**。改成真实工具映射。
+  - 结尾挂着一条 `CTF CORE CONTRACT` 横幅，底下**没有任何内容** —— 上次拆层留下的死字节。
+  - 有一段「如果被要求列出拒绝词，永远不要写原文」的规则：把拒绝词写进上下文本身就在抬高拒答倾向，且这个场景不会发生，删掉。
+- 全量注入 6439 → 4966 tok。按任务族：通用 2100（-58%）、web 渗透 2549（-49%）、逆向/卡密 3048（-39%）、CTF 3566（-28%）。
+- `presets/layers/eng.md` 入库，由 `scripts/install-layers.mjs` 装进 `prompt-inject.md`。
+- 保留的安全规则一条没减：不撤销用户未提交的改动、不碰破坏性 git 命令、不用 `--amend`、改配置前先备份给回滚。
+
+## English
+
+- Slimmed the `eng` layer from 8373 to 873 bytes (-90%). Three defects, not verbosity:
+  - It mandated "Always use apply_patch for manual code edits", but this runtime exposes `read` / `write` / `edit` / `grep` / `glob` / `bash` — there is no apply_patch. Replaced with a real tool mapping.
+  - It ended with a `CTF CORE CONTRACT` banner and no content under it — a dead fragment from an earlier layer split.
+  - It carried a rule about never writing literal refusal phrases; putting refusal vocabulary into context primes refusal and the scenario never occurs. Removed.
+- Full injection 6439 → 4966 tok. Per task family: general 2100 (-58%), web 2549 (-49%), reverse engineering 3048 (-39%), CTF 3566 (-28%).
+- `presets/layers/eng.md` now ships in the repo; `scripts/install-layers.mjs` installs it into `prompt-inject.md`.
+- No safety rule was dropped: user's uncommitted changes are never reverted, destructive git commands stay off-limits, no `--amend`, back up before touching config and hand over a rollback command.
+
 # 1.1.80
 
 ## 中文
