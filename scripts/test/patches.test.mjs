@@ -70,3 +70,28 @@ test("同一条补丁不会同时出现在两个显示分组里", () => {
   }
   assert.deepEqual(dup, []);
 });
+
+test("notApplicable 声明必须自带理由和可验证条件", () => {
+  const declared = ALL_PATCHES.filter((p) => p.notApplicable);
+  assert.ok(declared.length >= 2, "至少 #71 / #80 应声明 notApplicable");
+  for (const p of declared) {
+    const spec = p.notApplicable;
+    assert.equal(typeof spec.reason, "string", `#${p.id} reason 必须是字符串`);
+    assert.ok(spec.reason.length >= 8, `#${p.id} reason 太短，说不清为什么不适用`);
+    const hasAbsent = Array.isArray(spec.whenAbsent) && spec.whenAbsent.length > 0;
+    const hasNoPattern = spec.whenNoPattern === true;
+    assert.ok(hasAbsent || hasNoPattern, `#${p.id} 没有可验证条件，等于无条件免责`);
+    if (hasAbsent) {
+      // 条件必须落在自己能解析的文件键上，否则永远不会触发，声明就成了死字段。
+      for (const key of spec.whenAbsent) {
+        assert.ok(p.file.includes(key), `#${p.id} whenAbsent 里的 ${key} 不在 file 里`);
+      }
+    }
+  }
+});
+
+test("回退型补丁不能只靠 whenNoPattern 结案", () => {
+  // 只有「文件在 + 一条 pattern 都没命中」才等于正常终态；文件不在必须另有交代。
+  const noPatternOnly = ALL_PATCHES.filter((p) => p.notApplicable?.whenNoPattern === true && !(p.notApplicable?.whenAbsent?.length > 0));
+  assert.deepEqual(noPatternOnly.map((p) => p.id), [], "whenNoPattern 必须配 whenAbsent，否则目标包缺失时会静默");
+});

@@ -1,3 +1,20 @@
+# 1.1.87
+
+## 中文
+
+- **把「本安装天然不适用」从故障里摘出来**。`#71 LIANGSHEN_IDENTITY_LINE` 与 `#80 MINIMAL_OFFICIAL_TOOLSET` 长期显示 `missing_file` / `skipped`，看着像漏做，其实是环境里没有对象：前者要的梁神 preset 没装，后者是回退型补丁、官方 minimal preset 从没追加过 fs/web 工具。
+- 补丁定义新增 `notApplicable` 声明：必须有 `reason`（说不清为什么就不算数），以及至少一个**可验证条件**——`whenAbsent`（列出的文件键全部解析不到）或 `whenNoPattern`（文件在、但一条 pattern 都没命中）。两者都不满足时它**不会**生效，所以 pattern 漂移仍然是故障，不会被这张声明遮掉。
+- `whenNoPattern` 必须同时带 `whenAbsent`：只写前者的话，目标包缺失时会静默掉。已加测试锁住。
+- `patchStatus` 拆成 `patchStatusDetailed`（返回 `{status, notes}`）+ 薄包装，`gatherState` 新增 `patch_notes`；状态输出多一段「本安装不适用 / not applicable here」，把理由直接写出来。
+- 结果：app 包视角 62/62 applied、0 pending、0 skipped；`#71`/`#80` 从可疑的跳过变成有理由的 n/a。
+
+## English
+
+- `#71` and `#80` no longer report as `missing_file` / `skipped` — they were never failures, just patches with no object in this install.
+- New `notApplicable` declaration requires a human `reason` plus a verifiable condition (`whenAbsent` or `whenNoPattern`); without one being met the patch keeps its normal status, so pattern drift is still surfaced as a fault.
+- `whenNoPattern` must be paired with `whenAbsent`, enforced by test.
+- `patchStatusDetailed` adds a `notes` map, surfaced as a "not applicable here" section in the status output.
+
 # 1.1.86
 
 ## 中文
