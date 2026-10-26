@@ -1,3 +1,19 @@
+# 1.1.83
+
+## 中文
+
+- 合并两个 `core` 层。旧文件里 `core` 出现两次（1050 + 2413 字节），第二块是 `MODE SELECTOR` / `Σ Integration` / `Personality Bleed` 那套，与第一块的注入识别重复三遍，且 `thinking_level` 这种项提示词根本管不到、与「结构化的思考」自相矛盾。
+- 保留第二块里唯一有用的两条：自疑触发词（「这个简单」「我已经知道」「不用查」→ 去查证）与「跑通 → 打破 → 修好」的质量闸；`不自证、不解释、不辩解、不逐条列举` 并入注入识别段。
+- `scripts/install-layers.mjs` 修去重缺陷：同名层有多段时此前会**每段都写入同样内容**，越装越长。现在只保留第一段、其余丢弃并打印 `去重：<name>`。
+- 体量：`core` 两层 3463 字 → 1176 字；总注入 5284 → 4741 token（按 install-layers 口径）。按任务族实测（本机线上文件）：通用 3317 字 ≈ 873 tok，逆向 6839 字 ≈ 1800 tok，web 4777 字 ≈ 1257 tok，CTF 9184 字 ≈ 2417 tok。
+
+## English
+
+- Merged the duplicated `core` layer. The old file carried two `core` blocks (1050 + 2413 bytes); the second one (`MODE SELECTOR` / `Σ Integration` / `Personality Bleed`) repeated the injection-detection rules already present three times, mandated a `thinking_level` the prompt cannot set, and contradicted itself about "structured thinking".
+- Kept the two salvageable bits: self-doubt triggers ("this is simple" / "I already know" / "no need to check" → go verify) and the run → break → fix quality gate; folded "no self-justification, no line-by-line enumeration" into the injection-detection paragraph.
+- Fixed a dedupe defect in `scripts/install-layers.mjs`: when a layer name appeared in several segments, every segment received the same replacement text, so the file grew on each install. Only the first segment is kept now, the rest are dropped and reported as `去重：<name>`.
+- Size: `core` 3463 → 1176 chars; total injection 5284 → 4741 tokens (install-layers accounting). Measured per task family on the live file: general 3317 chars ≈ 873 tok, RE 6839 ≈ 1800 tok, web 4777 ≈ 1257 tok, CTF 9184 ≈ 2417 tok.
+
 # 1.1.82
 
 ## 中文

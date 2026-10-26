@@ -94,12 +94,20 @@ function main() {
   const byName = new Map(incoming.map((l) => [l.name, l.text]));
   const replaced = [];
   const added = [];
+  const dropped = [];
   const seen = new Set();
 
+  // 同名层出现两次是历史遗留（core 被追加过一块）：只认第一处，后面的丢掉。
+  // 不丢的话每次安装都会把同一份 content 再写一遍，越装越长。
   const out = segs.map((seg) => {
     if (seg.kind !== "layer") return seg.text;
     const next = byName.get(seg.name);
     if (next == null) return seg.text;
+    if (seen.has(seg.name)) {
+      const i = dropped.indexOf(seg.name);
+      if (i < 0) dropped.push(seg.name);
+      return "";
+    }
     seen.add(seg.name);
     replaced.push(seg.name);
     return next;
@@ -117,6 +125,7 @@ function main() {
     console.log(`[dry] 目标：${target}`);
     console.log(`[dry] 替换：${replaced.join(", ") || "无"}`);
     console.log(`[dry] 新增：${added.join(", ") || "无"}`);
+    console.log(`[dry] 去重：${dropped.join(", ") || "无"}`);
     console.log(`[dry] token：${tokenEstimate(before)} → ${tokenEstimate(after)}`);
     return;
   }
@@ -130,6 +139,7 @@ function main() {
   console.log(`备份：${backup}`);
   console.log(`替换：${replaced.join(", ") || "无"}`);
   console.log(`新增：${added.join(", ") || "无"}`);
+  console.log(`去重：${dropped.join(", ") || "无"}`);
   console.log(`token：${tokenEstimate(before)} → ${tokenEstimate(after)}`);
   console.log("重启 dsh 或 /layers reload 后生效");
 }
