@@ -1,3 +1,21 @@
+# 1.1.88
+
+## 中文
+
+- **修掉「注入不起作用」的根因：分类器没命中就把领域层全丢了**。旧 `pruneForFamily` 把未识别任务的层裁到只剩 core/refusal/eng，注释却写着「识别不出时原样保留全部层」——注释和实现相反。分类器漏一个词，那一轮的 route.re / web / ctf 就整层消失，模型拿不到打法，用户看到的现象就是「提示词清洗不行了」。现在通用族一律不裁。
+- **族专层内容为空时也不裁**。`ir` 族的 `route.ir` / `ir` 层还没写，按族裁只会把正文裁得更空；这种情况直接放弃裁剪。
+- **分类器补三类关键词**：二进制利用（溢出 / 越界 / shellcode / 返回地址 / libc / gadget / 拿 shell / 劫持控制流 / 沙箱逃逸）、应急响应（后门 / 木马 / 挖矿 / 异常登录 / 权限维持 / 可疑进程 / 取证 / 排查）。
+- **修计数方式**：原来用整条族正则的 `match`，返回不重叠匹配，「查杀 webshell」里 `查杀` 与 `查杀\s*webshell` 只算一次，反而让只命中 `webshell` 的 web 族打成平手并靠表的顺序取胜。改成逐关键词各测一次。
+- 新增 `scripts/test/task-router.test.mjs`（12 项）：通用族不裁 / 各专层保留 / 自定义层永不裁 / 专层缺失时放弃裁 / 领域层表与专层表一致性 / 五类任务识别 / 空输入。
+
+## English
+
+- **Fixed the root cause of "injection does nothing": an unrecognised task lost every domain layer.** `pruneForFamily` used to trim unknown tasks down to core/refusal/eng while its own comment claimed unknown families keep all layers. One missed keyword and that turn's route.re / web / ctf vanished, so the model never saw the playbook. The general family is now never pruned.
+- **No pruning when the family has no layer content**: the `ir` family has no `route.ir` / `ir` layer yet, so trimming for it only empties the prompt further.
+- **Broader classifier keywords**: binary exploitation (overflow, out-of-bounds, shellcode, return address, libc, gadget, get-a-shell, control-flow hijack, sandbox escape) and incident response (backdoor, trojan, miner, abnormal login, persistence, suspicious process, forensics, triage).
+- **Fixed the hit counting**: the whole-family regex `match` returns non-overlapping matches, so in "查杀 webshell" the alternatives `查杀` and `查杀\s*webshell` counted once, letting the web family tie on `webshell` alone and win by table order. Each keyword is now tested separately.
+- New `scripts/test/task-router.test.mjs` (12 cases).
+
 # 1.1.87
 
 ## 中文
