@@ -1,3 +1,23 @@
+# 1.1.89
+
+## 中文
+
+- **新增两个任务族：编译构建（`build`）与协议流量（`proto`）**，分别带 `route.build` / `route.proto` 层。构建侧关键词：交叉编译 / cross-compile / makefile / cmakelists / cmake / ninja / meson / cargo build / go build / npm run build / undefined reference / 链接错误 / 头文件缺失 / gcc / g++ / clang / zig cc / 静态编译 / strip / 打包成。协议侧：协议 / 封包 / 抓包 / 流量分析 / pcap / wireshark / tshark / tcpdump / mitmproxy / scapy / opcode / 帧头 / 报文 / 私有协议 / 重放 / 握手过程 / 心跳包 / protobuf / tlv。
+- **解包与脱壳归入逆向族**：`re` 族追加 `route.unpack` 层，关键词补解包 / asar / apktool / jadx / binwalk / unblob / squashfs / 固件 / firmware / upx / 加壳。
+- **CTF 族补上二进制利用层**：`ctf` 族追加 `route.pwn`，关键词补 checksec / ret2 / one_gadget / 栈对齐。
+- **6 个层文件入库**：`ctf` / `route.build` / `route.ir` / `route.proto` / `route.pwn` / `route.unpack`。`install-layers` 用 readdirSync 自动发现，层文件无需另行登记。
+- **修「用户手稿被当成出厂默认刷掉」**：`looksLikePluginDefault` 过去只按三个特征标记判血统，而旧版默认稿（首行 `<|im_start|>system:<project_instructions>`、正文含 `Little Code Sauce`）三标记全中。用户把这类旧稿整份搬进 `prompt-inject.md` 之后，`syncPromptInjectOnDiskSync` 每次组装都判定「这是出厂默认」，用加密槽静默覆盖磁盘——写入返回成功，文件随即消失，`source` 回落成 `default`。现在正文只要带 `<!-- purge:layer` 就一律不判为出厂默认（分层必然是手稿）；无层标记的旧默认稿仍照常识别并刷新，升级路径不变。
+- 测试：新增 `scripts/test/inject-default.test.mjs`（5 项，锁住血统判定的两条边界）；`task-router.test.mjs` 增加 3 项（编译构建 / 协议流量 / 解包归 re）。
+
+## English
+
+- **Two new families: `build` and `proto`**, backed by the `route.build` / `route.proto` layers. Build keywords cover cross-compilation, makefile/cmake/ninja/meson, cargo/go/npm builds, `undefined reference`, missing headers, gcc/clang/zig cc, static linking and strip. Protocol keywords cover packet capture and protocol analysis: pcap, wireshark/tshark/tcpdump, mitmproxy, scapy, opcode, frame headers, private protocols, replay, handshake, heartbeat, protobuf and TLV.
+- **Unpacking folded into the `re` family**: `route.unpack` is now attached to `re`, with keywords for asar / apktool / jadx / binwalk / unblob / squashfs / firmware / upx / packers.
+- **`ctf` gains the binary-exploitation layer** (`route.pwn`) plus checksec / ret2 / one_gadget / stack-alignment keywords.
+- **Six layer files are now in the repo**: `ctf`, `route.build`, `route.ir`, `route.proto`, `route.pwn`, `route.unpack`. `install-layers` discovers them via readdirSync, so no registry edit is needed.
+- **Fixed user drafts being wiped as factory defaults**: `looksLikePluginDefault` decided lineage from three marker strings, and a legacy default draft (ChatML header on line one, `Little Code Sauce` in the body) matched all three. Once such a draft was pasted into `prompt-inject.md`, `syncPromptInjectOnDiskSync` classified it as the plugin default on every assembly and silently overwrote the file with the encrypted slot — the write reported success, the file vanished, and `source` fell back to `default`. Text containing `<!-- purge:layer` is now never treated as a factory default, since layered text is by definition a user draft; marker-only legacy defaults are still detected and refreshed, so upgrades behave as before.
+- Tests: new `scripts/test/inject-default.test.mjs` (5 cases) and 3 more in `task-router.test.mjs`.
+
 # 1.1.88
 
 ## 中文

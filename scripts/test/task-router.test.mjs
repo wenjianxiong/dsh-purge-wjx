@@ -88,6 +88,24 @@ test("分类：应急响应", () => {
   }
 });
 
+test("分类：编译与构建", () => {
+  for (const q of ["交叉编译到 arm64", "编译报 undefined reference 怎么修", "这个 Makefile 构建一下"]) {
+    assert.equal(classifyTask(q), "build", q);
+  }
+});
+
+test("分类：协议与流量", () => {
+  for (const q of ["抓包看看这个私有协议的帧头", "解析这段流量的 opcode 并重放", "用 tshark 看握手过程"]) {
+    assert.equal(classifyTask(q), "proto", q);
+  }
+});
+
+test("分类：解包 / 脱壳归入逆向族", () => {
+  for (const q of ["这个 exe 加了 UPX 壳脱一下", "把这个 apk 解包看看 so"]) {
+    assert.equal(classifyTask(q), "re", q);
+  }
+});
+
 test("分类：普通工程任务保持 general", () => {
   for (const q of ["改一下这个页面的样式", "又得更新 dsh-purge，提示词清洗不行了", "今天吃什么"]) {
     assert.equal(classifyTask(q), GENERAL, q);
